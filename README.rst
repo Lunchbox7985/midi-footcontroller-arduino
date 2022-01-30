@@ -7,7 +7,7 @@ midi-footcontroller-arduino
 .. image:: images/Schem.png
    :scale: 25 %
    
-   .. image:: images/b2ap3_large_MIDI-transmitter.png
+.. image:: images/b2ap3_large_MIDI-transmitter.png
    :scale: 25 %
 License MPL v2.0, originally written by Jack Ha.
 
