@@ -65,8 +65,9 @@ https://ccrma.stanford.edu/~craig/articles/linuxmidi/misc/essenmidi.html
 #define MODE_EASY 3  // not implemented
 
 // program Eventide H9 (or any other device) accordingly.
+// i changed the preset from 40 to 0 so the 32 presets are 1-32 i dont have an Eventide, i just use amplitube -Lunchbox
 #define MIDI_CC_TUNER 0
-#define MIDI_CC_PRESET_START 40  // PRESET_START + index (0 to 3) + 4 * current_page will be sent.
+#define MIDI_CC_PRESET_START 0  // PRESET_START + index (0 to 3) + 4 * current_page will be sent.
 #define MIDI_CC_LOOPER_RECORD 109
 #define MIDI_CC_LOOPER_PLAY 110
 #define MIDI_CC_LOOPER_STOP 111
@@ -261,42 +262,43 @@ void loop() {
     have_action = true;
     midi_cc(MIDI_CC, MIDI_CC_TUNER, 0x0);
   }
-  
+ // i added a function (i think thats what its called) "midi_pc" and changed all the presets to that, 
+ // amplitube was expecting 2 bytes for a program change not 3 like a control change -Lunchbox
   if (current_mode == MODE_PRESET) {
     if (button_press[BTN_PRESET1]) {
       have_action = true;
-      midi_cc(MIDI_PC, MIDI_CC_PRESET_START+0+current_page*4, MIDI_CC_HIGH_VALUE);
+      midi_pc(MIDI_PC, MIDI_CC_PRESET_START+0+current_page*4);
     }
     if (button_depress[BTN_PRESET1]) {
       have_action = true;
-      midi_cc(MIDI_PC, MIDI_CC_PRESET_START+0+current_page*4, 0);
+      midi_pc(MIDI_PC, MIDI_CC_PRESET_START+0+current_page*4);
     }
 
     if (button_press[BTN_PRESET2]) {
       have_action = true;
-      midi_cc(MIDI_PC, MIDI_CC_PRESET_START+1+current_page*4, MIDI_CC_HIGH_VALUE);
+      midi_pc(MIDI_PC, MIDI_CC_PRESET_START+1+current_page*4);
     }
     if (button_depress[BTN_PRESET2]) {
       have_action = true;
-      midi_cc(MIDI_PC, MIDI_CC_PRESET_START+1+current_page*4, 0);
+      midi_pc(MIDI_PC, MIDI_CC_PRESET_START+1+current_page*4);
     }
 
     if (button_press[BTN_PRESET3]) {
       have_action = true;
-      midi_cc(MIDI_PC, MIDI_CC_PRESET_START+2+current_page*4, MIDI_CC_HIGH_VALUE);
+      midi_pc(MIDI_PC, MIDI_CC_PRESET_START+2+current_page*4);
     }
     if (button_depress[BTN_PRESET3]) {
       have_action = true;
-      midi_cc(MIDI_PC, MIDI_CC_PRESET_START+2+current_page*4, 0);
+      midi_pc(MIDI_PC, MIDI_CC_PRESET_START+2+current_page*4);
     }
 
     if (button_press[BTN_PRESET4]) {
       have_action = true;
-      midi_cc(MIDI_PC, MIDI_CC_PRESET_START+3+current_page*4, MIDI_CC_HIGH_VALUE);
+      midi_pc(MIDI_PC, MIDI_CC_PRESET_START+3+current_page*4);
     }
     if (button_depress[BTN_PRESET4]) {
       have_action = true;
-      midi_cc(MIDI_PC, MIDI_CC_PRESET_START+3+current_page*4, 0);
+      midi_pc(MIDI_PC, MIDI_CC_PRESET_START+3+current_page*4);
     }
 
     if (button_press[BTN_PAGE_UP]) {
@@ -332,7 +334,7 @@ void loop() {
       have_action = true;
       midi_cc(MIDI_CC, MIDI_CC_LOOPER_STOP, MIDI_CC_HIGH_VALUE);
     }
-    if (button_depress[BTN_REC]) {
+    if (button_depress[BTN_STOP]) {
       have_action = true;
       midi_cc(MIDI_CC, MIDI_CC_LOOPER_STOP, 0);
     }
@@ -353,6 +355,15 @@ void loop() {
     if (button_depress[BTN_OCTAVE]) {
       have_action = true;
       midi_cc(MIDI_CC, MIDI_CC_LOOPER_OCTAVE, 0);
+    }
+
+    if (button_press[BTN_EMPTY]) {
+      have_action = true;
+      midi_cc(MIDI_CC, MIDI_CC_LOOPER_EMPTY, MIDI_CC_HIGH_VALUE);
+    }
+    if (button_depress[BTN_EMPTY]) {
+      have_action = true;
+      midi_cc(MIDI_CC, MIDI_CC_LOOPER_EMPTY, 0);
     }
   }
   
@@ -460,3 +471,8 @@ void midi_cc(int cmd, int pitch, int velocity) {
   Serial.write(pitch);
   Serial.write(velocity);
 }
+// i added this to control PC in amplitube as it was expecting 2 bytes and not 3 like above -Lunchbox
+void midi_pc(int cmd, int data) {
+  Serial.write(cmd);
+  Serial.write(data);
+  }
