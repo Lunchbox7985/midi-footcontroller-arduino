@@ -4,6 +4,8 @@ MIDI controller
 8 footswitch, 2 expression pedal with 8 neopixel foot controller for Eventide H9.
 License MPL v2.0, originally written by Jack Ha.
 
+Modified some settings and fixed a couple errors, as well as added code to support midi input as well.
+Midi in code from https://sodocumentation.net/arduino/topic/9406/midi-communication for proper function and passthrough of data from midi in -Lunchbox
 button numbering:
 5 6 7 8
 1 2 3 4
@@ -55,6 +57,7 @@ https://ccrma.stanford.edu/~craig/articles/linuxmidi/misc/essenmidi.html
 #define NUM_ANALOGS 2
 #define LED 13
 
+//change the last 0 in the next 3 values to correspond with the desired midi channel in hexadecimal, 0-f = 1-16
 #define MIDI_NOTE 0x90
 #define MIDI_CC 0xB0
 #define MIDI_PC 0xC0
@@ -157,6 +160,9 @@ int current_page = 0;  // 8 pages because we have 8 leds :-)
 
 boolean have_action = false;
 
+// this snipet from https://sodocumentation.net/arduino/topic/9406/midi-communication for proper function and passthrough of data from midi in -Lunchbox
+boolean byteReady; 
+unsigned char midiByte;
 
 void setup() {
   pixels.begin(); // This initializes the NeoPixel library.
@@ -168,10 +174,19 @@ void setup() {
 
   //  Set MIDI baud rate:
   Serial.begin(31250);
-  //Serial.begin(9600);
+
+// this snipet from https://sodocumentation.net/arduino/topic/9406/midi-communication for proper function and passthrough of data from midi in -Lunchbox
+    byteReady = false;
+    midiByte = 0;  
 }
 
 void loop() {
+
+// this snipet from https://sodocumentation.net/arduino/topic/9406/midi-communication for proper function and passthrough of data from midi in -Lunchbox
+     if (byteReady) {
+        byteReady = false;
+        Serial.write(midiByte);
+    }
   // reset colors, we set them at the end of the loop function
   for (int led=0; led<NUM_PIXELS; led++) {
     for (int x=0; x<3; x++) {
@@ -464,6 +479,16 @@ void loop() {
   delay(1);
 }
 
+// this snipet from https://sodocumentation.net/arduino/topic/9406/midi-communication for proper function and passthrough of data from midi in -Lunchbox
+// The little function that gets called each time loop is called.  
+// This is automated somwhere in the Arduino code.
+void serialEvent() {
+  if (Serial.available()) {
+    // get the new byte:
+    midiByte = (unsigned char)Serial.read();
+    byteReady = true;
+  }
+}
 //  plays a MIDI note.  Doesn't check to see that
 //  cmd is greater than 127, or that data values are  less than 127:
 void midi_cc(int cmd, int pitch, int velocity) {
